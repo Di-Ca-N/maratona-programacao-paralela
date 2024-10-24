@@ -1,4 +1,4 @@
-FLAGS=-O3 -Wall -std=c++17 -fopenmp
+FLAGS=-O3 -Wall -std=c++17 -fopenmp -fopenmp-targets=nvptx64
 EXEC=TSPSolver
 CXX=g++
 

@@ -1,4 +1,4 @@
-FLAGS=-O3
+FLAGS=-O3 -fopenmp -pg
 
 CC=gcc
 
@@ -8,7 +8,7 @@ EXEC=center
 
 all: $(EXEC)
 
-$(EXEC):
+$(EXEC): $(EXEC).c
 	$(CC) $(FLAGS) $(EXEC).c -o $(EXEC)
 
 clean:

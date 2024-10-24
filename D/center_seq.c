@@ -62,7 +62,6 @@ int max_distance(Tree_t *tree, int *queue) {
 	first = 0;
 	n = tree->n;
 	max_level = 0;
-	#pragma omp for schedule(static, 32)
 	for (i = 0; i < n; i++)
 		tree->visited[i] = 0;
 	tree->visited[queue[0]] = 1;
@@ -94,30 +93,20 @@ void print_tree(Tree_t *tree) { //can be used for debugging
 
 
 }
-
-struct result {
-	int dist;
-	int center;
-};
-
 int find_center(Tree_t *tree, int *queue) {
 	int n = tree->n, center = -1, i, max_dist, tmp;
 	max_dist = n;
 
-	//#pragma omp declare reduction(mindist : struct result : omp_out = (omp_in.dist < omp_out.dist) ? omp_in : omp_out) initializer(omp_priv = omp_orig)
-	struct result r = {n, -1};
-	//#pragma omp parallel for reduction(mindist:r) schedule(static, 32)
 	for (i = 0; i < n; i++) {
 		queue[0] = i;
 		tmp = max_distance(tree, queue);
-
-		if (tmp < r.dist) {
-			r.dist = tmp;
-			r.center = i;
+		if (tmp < max_dist) {
+			max_dist = tmp;
+			center = i;
 		}
 	}	
 
-	return(r.center);
+	return(center);
 
 }
 

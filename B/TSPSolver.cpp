@@ -99,33 +99,39 @@ private:
     }
 
     std::pair<std::vector<int>, double> hillClimb(int numIterations) {
-        std::vector<int> currentTour = generateRandomTour();
-        double currentLength = calculateTourLength(currentTour);
+        std::vector<int> currentTour;
+        double currentLength;
+        #pragma omp target device(1) map(to:currentTour) map(to:currentLength)
+        {
+            std::vector<int> currentTour = generateRandomTour();
+            double currentLength = calculateTourLength(currentTour);
 
-        for (int iter = 0; iter < numIterations; ++iter) {
-            bool improvement = false;
-            for (size_t i = 1; i < currentTour.size() - 1; ++i) {
-                for (size_t j = i + 1; j < currentTour.size(); ++j) {
-                    Tour a = twoOptSwap(currentTour, i, j, currentLength);
-                    std::vector<int> newTour = a.tour;
-                    double newLength = a.length;
-                    if (newLength < currentLength) {
-                        currentTour = std::move(newTour);
-                        currentLength = newLength;
-                        improvement = true;
-                        break;
+            for (int iter = 0; iter < numIterations; ++iter) {
+                bool improvement = false;
+                for (size_t i = 1; i < currentTour.size() - 1; ++i) {
+                    for (size_t j = i + 1; j < currentTour.size(); ++j) {
+                        Tour a = twoOptSwap(currentTour, i, j, currentLength);
+                        std::vector<int> newTour = a.tour;
+                        double newLength = a.length;
+                        if (newLength < currentLength) {
+                            currentTour = std::move(newTour);
+                            currentLength = newLength;
+                            improvement = true;
+                            break;
+                        }
                     }
+                    if (improvement) break;
                 }
-                if (improvement) break;
+                if (!improvement) break;
             }
-            if (!improvement) break;
+            
         }
-
         return {currentTour, currentLength};
     }
 };
 
 int main(int argc, char* argv[]) {
+    printf("Num Devices: %d\n", omp_get_num_devices());
     try {
         std::string line;
         std::getline(std::cin, line);

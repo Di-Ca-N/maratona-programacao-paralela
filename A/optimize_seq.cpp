@@ -52,7 +52,7 @@ int main(){
       
    memset(memo, -1, sizeof(memo));
 
-    printf("%d\n", dp(0, capacity[0], capacity[1], capacity[2]));
+   printf("%d\n", dp(0, capacity[0], capacity[1], capacity[2]));
 
    return 0;
 }
