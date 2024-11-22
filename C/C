@@ -1,1 +1,2 @@
-./RiemannSiegel
+export OMP_NUM_THREADS=128
+OMP_NUM_THREADS=128 ./RiemannSiegel

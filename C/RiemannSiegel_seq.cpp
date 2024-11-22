@@ -8,7 +8,7 @@
 #include <complex>
 #include <vector>
 #include <cassert>
-#include <cstring>
+
 /*************************************************************************
 * *
 
@@ -21,9 +21,6 @@ https://en.wikipedia.org/wiki/Riemann_zeta_function
 
 typedef unsigned long      ui32;
 typedef unsigned long long ui64;
-
-double *memo;
-int *computed;
 
 double dml_micros()
 {
@@ -216,41 +213,16 @@ int main(int argc,char **argv)
 	ui64   NUMSAMPLES=floor((UPPER-LOWER)*SAMP+1.0);
 	double prev=0.0;
 	double count=0.0;
-
-    memo = (double*) malloc(NUMSAMPLES * sizeof(double));
-    computed = (int*) malloc(NUMSAMPLES * sizeof(int));
-
-    memset(computed, 0, sizeof(computed));
-
-    #pragma omp parallel for reduction(+:count) schedule(static, 32)
-	for (ui64 i = 0; i < NUMSAMPLES; i++) {
-        double zout, prev = 0.0, t;
-        
-        t = LOWER + i * STEP;
-
-        if (computed[i] == 0) {
-            memo[i] = Z(t, 4);
-            computed[i] = 1;
-            zout = memo[i];
-        } else {
-            zout = memo[i];
-        }
-
-        if (i != 0 && computed[i - 1] == 0) {
-            double t_prev = LOWER + (i - 1) * STEP;
-            memo[i-1] = Z(t_prev, 4);
-            computed[i-1] = 1;
-            prev = memo[i-1];
-        }
-        if (i > 0) {
-            prev = memo[i-1];
-        }
-
-        if(t > LOWER && zout * prev < 0.0){
-			count++;
+	for (double t=LOWER;t<=UPPER;t+=STEP){
+		double zout=Z(t,4);
+		if(t>LOWER){
+			if(   ((zout<0.0)and(prev>0.0))
+			    or((zout>0.0)and(prev<0.0))){
+				count++;
+			}
 		}
+		prev=zout;
 	}
-
 	printf("I found %1.0lf Zeros\n",count);
 	return(0);
 }
